@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="vendor-list"></div>
+
+<div id="upload-section" style="display:none;">
+    <h3>Upload File</h3>
+    <input type="file" id="file-input">
+    <button onclick="uploadFile()">Upload</button>
+</div>
+
+<div id="order-section" style="display:none;">
+    <h3>Create Order</h3>
+
+    <input type="number" id="copies" placeholder="Copies">
+    
+    <select id="print-size">
+        <option value="A4">A4</option>
+        <option value="Letter">Letter</option>
+    </select>
+
+    <select id="color">
+        <option value="bw">Black & White</option>
+        <option value="color">Color</option>
+    </select>
+
+    <input type="number" id="total" placeholder="Total">
+
+    <button onclick="createOrder()">Submit Order</button>
+</div>
+
+    <script src="order.js">  </script>
+</body>
+</html>
