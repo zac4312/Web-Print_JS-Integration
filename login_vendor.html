@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+    <h3>Vendor Login</h3>
+
+    <input id="username" placeholder="Email or Username">
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="vendorLogin()">Login</button>
+</div>
+<div id="vendor-home"></div>
+
+<button onclick="toggleOrders()"> Orders </button>
+
+<div id="orders-container" style="display:none;"></div>
+
+<button onclick="toggleHandlingOrders()"> Handling Orders</button>
+
+<div id="handling-container" style="display:none;"></div>
+
+<script src="login_vendor.js"> </script>
+
+</body>
+</html>
