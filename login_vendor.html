@@ -24,6 +24,37 @@
 
 <div id="handling-container" style="display:none;"></div>
 
+<div id="availability-section">
+    <h3>Availability</h3>
+
+    <label>
+        <input type="radio" name="availability" value="Available"> Available
+    </label>
+
+    <label>
+        <input type="radio" name="availability" value="Busy"> Busy 
+    </label>
+
+    <label>
+        <input type="radio" name="availability" value="SBusy"> Slightly Busy 
+    </label>
+
+    <label>
+        <input type="radio" name="availability" value="Closed"> Closed
+    </label>
+
+
+    <br><br>
+
+    <button onclick="updateAvailability()">Confirm</button>
+
+    <div>
+        <h3>Upload GCash QR</h3>
+        <input type="file" id="gcash-file">
+        <button onclick="uploadGcash()">Upload</button>
+    </div>
+</div>
+
 <script src="login_vendor.js"> </script>
 
 </body>

@@ -133,7 +133,10 @@ function renderOrders(orders) {
             <p>Color: ${order.color}</p>
             <p>Total: ${order.total}</p>
             <p>Status: ${order.status}</p>
-            <p>File: ${order.file_path}</p>
+           
+            <button onclick="downloadFile('${order.file_path}', '${order.pub_id}')">
+                Download File
+            </button>
 
             <button onclick="acceptOrder('${order.pub_id}')">
                 Accept
@@ -250,4 +253,114 @@ function renderHandlingOrders(orders) {
 
         container.appendChild(div);
     });
+}
+
+async function updateAvailability() {
+    const vendorId = localStorage.getItem("vendor_id");
+
+    if (!vendorId) {
+        alert("Not logged in");
+        return;
+    }
+
+    const selected = document.querySelector('input[name="availability"]:checked');
+
+    if (!selected) {
+        alert("Select a status");
+        return;
+    }
+
+    const value = selected.value;
+
+    const response = await fetch(`http://localhost:3001/vendor/${vendorId}/change_status`, {
+        method: "POST", // or PATCH (better, but POST is fine for now)
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(value) // sending raw string
+    });
+
+    const text = await response.text();
+
+    if (!response.ok) {
+        console.error("Failed:", text);
+        alert("Failed to update");
+        return;
+    }
+
+    console.log("Updated:", value);
+    alert("Availability updated!");
+}
+
+async function uploadGcash() {
+    const vendorId = localStorage.getItem("vendor_id");
+
+    if (!vendorId) {
+        alert("Not logged in");
+        return;
+    }
+
+    const fileInput = document.getElementById("gcash-file");
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Select a file");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(
+        `http://localhost:3001/vendor/${vendorId}/add_gcash`,
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+
+    const text = await response.text();
+
+    if (!response.ok) {
+        console.error("Upload failed:", text);
+        return;
+    }
+
+    const path = JSON.parse(text);
+
+    console.log("Uploaded:", path);
+
+    alert("GCash QR uploaded!");
+}
+
+async function downloadFile(file_path, pub_id) {
+    const response = await fetch("http://localhost:3001/vendor/download_file", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            file_path,
+            pub_id
+        })
+    });
+
+    if (!response.ok) {
+        console.error("Download failed");
+        return;
+    }
+
+    const blob = await response.blob();
+
+    // create download link
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = pub_id + ".bin"; // match backend
+    document.body.appendChild(a);
+    a.click();
+
+    a.remove();
+    window.URL.revokeObjectURL(url);
 }
