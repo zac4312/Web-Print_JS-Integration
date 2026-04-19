@@ -249,6 +249,10 @@ function renderHandlingOrders(orders) {
             <p>Size: ${order.print_size}</p>
             <p>Total: ${order.total}</p>
             <p>Status: ${order.status}</p>
+
+            <button onclick="openPayment('${order.pub_id}', '${order.vendor_pub_id}')">
+                Pay
+            </button>
         `;
 
         container.appendChild(div);
@@ -357,10 +361,12 @@ async function downloadFile(file_path, pub_id) {
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = pub_id + ".bin"; // match backend
+    a.download = file_path; // match backend
     document.body.appendChild(a);
     a.click();
 
     a.remove();
     window.URL.revokeObjectURL(url);
+
+    console.log(file_path)
 }

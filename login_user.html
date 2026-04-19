@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <div>
+        <h3>User Login</h3>
+        <input id="login-name" placeholder="Name">
+        <input id="login-password" type="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+
+    
+    <div id="payment-section" style="display:none;">
+        <h3>Payment</h3>
+
+        <img id="gcash-img" width="200"/>
+
+        <input type="file" id="receipt-input">
+        <button onclick="submitReceipt()">Submit Receipt</button>
+    </div>
+    
+    <div id="orders-container"></div>
+    
+    <a href="order_process.html"> make order </a>
+
+<script src="client.js"> </script>
+
+</body>
+</html>
