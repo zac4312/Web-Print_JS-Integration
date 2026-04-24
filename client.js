@@ -101,12 +101,12 @@ function renderUserOrders(orders) {
         const div = document.createElement("div");
 
         div.innerHTML = `
-            <h3>Order: ${order.pub_id}</h3>
+            <h3>Order: ${order.o_pub_id}</h3>
             <p>Vendor: ${order.brand}</p>
             <p>Status: ${order.status}</p>
             <p>Total: ${order.total}</p>
 
-            <button onclick="openPayment('${order.pub_id}', '${order.vendor_pub_id}')">
+            <button onclick="openPayment('${order.o_pub_id}', '${order.v_pub_id}')">
                 Pay
             </button>
         `;
