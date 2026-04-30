@@ -78,27 +78,33 @@ function showOrderSection() {
 }
 
 async function createOrder() {
+    const token = localStorage.getItem("usr_token");
+        
+        console.log("token: " + token);
+
     const copies = parseInt(document.getElementById("copies").value);
     const print_size = document.getElementById("print-size").value;
     const total = parseFloat(document.getElementById("total").value);
 
     const vendor = localStorage.getItem("selected_vendor");
     const file = localStorage.getItem("uploaded_file");
-
-    const user = "test_USR_001";
-
+ 
 const color = document.getElementById("color").value; // "color" or "bw"
 const colorValue = color === "color"; //
 
-    const payload = { copies, print_size, color: colorValue, file, total, vendor, user };
+    const payload = { copies, print_size, color: colorValue, file, total, vendor};
 
-    const response = await fetch("http://localhost:3001/order/createorder", {
+    await fetch("http://localhost:3001/order/createorder", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
         body: JSON.stringify(payload)
     });
 
     alert("Order created successfully!");
+
 }
 
 get_vendors();

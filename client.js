@@ -41,7 +41,7 @@ async function login() {
         body: JSON.stringify(payload)
     });
 
-    const text = await response.text();
+    const token = await response.json();
 
     if (!response.ok) {
         console.error("Login failed:", text);
@@ -49,13 +49,11 @@ async function login() {
         return;
     }
 
-    // backend returns: "test_USR_001"
-    const user_id = JSON.parse(text);
 
-    console.log("Logged in:", user_id);
+    console.log("token :", token);
 
     // ✅ store session
-    localStorage.setItem("user_id", user_id);
+    localStorage.setItem("usr_token", token);
 
     alert("Welcome Back");
 
@@ -64,14 +62,20 @@ async function login() {
 }
 
 async function loadUserOrders() {
-    const userId = localStorage.getItem("user_id");
+    const token = localStorage.getItem("usr_token");
 
-    if (!userId) {
+    if (!token) {
         console.log("No user logged in");
         return;
     }
 
-    const response = await fetch(`http://localhost:3001/user/${userId}/orders`);
+    const response = await fetch("http://localhost:3001/user/orders", { 
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        }
+    });
 
     const text = await response.text();
 

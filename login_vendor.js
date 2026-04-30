@@ -1,3 +1,5 @@
+const vendor_token = localStorage.getItem("vendor_token");
+
 async function vendorLogin() {
     const payload = {
         username: document.getElementById("username").value,
@@ -12,7 +14,6 @@ async function vendorLogin() {
         body: JSON.stringify(payload)
     });
 
-    // IMPORTANT: avoid .json() crashes if backend ever changes
     const text = await response.text();
 
     if (!response.ok) {
@@ -21,27 +22,31 @@ async function vendorLogin() {
         return;
     }
 
-    // backend returns raw JSON string like: "test_VND_001"
-    const pub_id = JSON.parse(text);
+    const token = JSON.parse(text);
 
-    console.log("Logged in vendor:", pub_id);
+    console.log("token:", token);
 
-    // store session (MVP approach)
-    localStorage.setItem("vendor_id", pub_id);
+    localStorage.setItem("vendor_token", token);
 
     alert("Login successful!");
     loadVendorHome();
 }
 
 async function loadVendorHome() {
-    const vendorId = localStorage.getItem("vendor_id");
+    const vendor_token = localStorage.getItem("vendor_token");
 
-    if (!vendorId) {
+    if (!vendor_token) {
         alert("No vendor logged in");
         return;
     }
 
-    const response = await fetch(`http://localhost:3001/vendor/${vendorId}/home`);
+    const response = await fetch("http://localhost:3001/vendor/home", {
+        method: "get",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + vendor_token
+        }
+    });
 
     const text = await response.text();
 
@@ -94,11 +99,17 @@ async function toggleOrders() {
 }
 
 async function loadOrders() {
-    const vendorId = localStorage.getItem("vendor_id");
+    const vendor_token = localStorage.getItem("vendor_token");
 
-    if (!vendorId) return;
+    if (!vendor_token) return;
 
-    const response = await fetch(`http://localhost:3001/vendor/${vendorId}/orders`);
+    const response = await fetch("http://localhost:3001/vendor/orders", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + vendor_token
+        }
+    });
 
     const text = await response.text();
 
@@ -193,6 +204,21 @@ async function rejectOrder(pub_id) {
     loadOrders();
 }
 
+async function see_reciept(pub_id) {
+    const response = await fetch(`http://localhost:3001/order/${pub_id}/reciept`);
+
+    if (!response.ok) {
+        console.error("Failed to load GCash QR");
+        return;
+    }
+
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+}
+   
+
+
+
 let handlingVisible = false;
 
 async function toggleHandlingOrders() {
@@ -211,11 +237,17 @@ async function toggleHandlingOrders() {
 }
 
 async function loadHandlingOrders() {
-    const vendorId = localStorage.getItem("vendor_id");
+    const vendor_token = localStorage.getItem("vendor_token");
 
-    if (!vendorId) return;
+    if (!vendor_token) return;
 
-    const response = await fetch(`http://localhost:3001/vendor/${vendorId}/handlingorders`);
+    const response = await fetch("http://localhost:3001/vendor/handlingorders", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + vendor_token
+        }
+    });
 
     const text = await response.text();
 
@@ -229,9 +261,9 @@ async function loadHandlingOrders() {
     renderHandlingOrders(orders);
 }
 
-function renderHandlingOrders(orders) {
-    const container = document.getElementById("handling-container");
 
+async function renderHandlingOrders(orders) {
+    const container = document.getElementById("handling-container");
     container.innerHTML = "";
 
     if (!orders.length) {
@@ -239,8 +271,10 @@ function renderHandlingOrders(orders) {
         return;
     }
 
-    orders.forEach(order => {
+    for (const order of orders) {
         const div = document.createElement("div");
+
+        const imgUrl = await see_reciept(order.pub_id);
 
         div.innerHTML = `
             <h3>Order ${order.pub_id}</h3>
@@ -249,20 +283,17 @@ function renderHandlingOrders(orders) {
             <p>Size: ${order.print_size}</p>
             <p>Total: ${order.total}</p>
             <p>Status: ${order.status}</p>
-
-            <button onclick="openPayment('${order.pub_id}', '${order.vendor_pub_id}')">
-                Pay
-            </button>
+            <img src="${imgUrl}" alt="No receipt available">
         `;
 
         container.appendChild(div);
-    });
+    }
 }
 
 async function updateAvailability() {
-    const vendorId = localStorage.getItem("vendor_id");
+    const vendor_token = localStorage.getItem("vendor_token");
 
-    if (!vendorId) {
+    if (!vendor_token) {
         alert("Not logged in");
         return;
     }
@@ -276,10 +307,11 @@ async function updateAvailability() {
 
     const value = selected.value;
 
-    const response = await fetch(`http://localhost:3001/vendor/${vendorId}/change_status`, {
+    const response = await fetch(`http://localhost:3001/vendor/change_status`, {
         method: "POST", // or PATCH (better, but POST is fine for now)
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + vendor_token
         },
         body: JSON.stringify(value) // sending raw string
     });
@@ -297,9 +329,9 @@ async function updateAvailability() {
 }
 
 async function uploadGcash() {
-    const vendorId = localStorage.getItem("vendor_id");
+    const vendor_token = localStorage.getItem("vendor_token");
 
-    if (!vendorId) {
+    if (!vendor_token) {
         alert("Not logged in");
         return;
     }
@@ -315,10 +347,11 @@ async function uploadGcash() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch(
-        `http://localhost:3001/vendor/${vendorId}/add_gcash`,
-        {
+    const response = await fetch("http://localhost:3001/vendor/add_gcash", {
             method: "POST",
+            headers: {
+                "Authorization": "Bearer " + vendor_token
+            },
             body: formData
         }
     );
@@ -338,10 +371,12 @@ async function uploadGcash() {
 }
 
 async function downloadFile(file_path, pub_id) {
+
     const response = await fetch("http://localhost:3001/vendor/download_file", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "multipart/form-data",
+            "Authorization": "Bearer " + vendor_token
         },
         body: JSON.stringify({
             file_path,
