@@ -77,22 +77,62 @@ function showOrderSection() {
     document.getElementById("order-section").style.display = "block";
 }
 
-async function createOrder() {
-    const token = localStorage.getItem("usr_token");
-        
-        console.log("token: " + token);
-
+async function review_order() {
+    const vendor = localStorage.getItem("selected_vendor");
     const copies = parseInt(document.getElementById("copies").value);
     const print_size = document.getElementById("print-size").value;
-    const total = parseFloat(document.getElementById("total").value);
 
-    const vendor = localStorage.getItem("selected_vendor");
+    
+    const color = document.getElementById("color").value;
+    const colorValue = color === "color";
+
+    const order_data = { copies, vendor ,color: colorValue };
+
+    const totalRes = await fetch("http://localhost:3001/order/total", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(order_data)
+    });
+
+    if (!totalRes.ok) {
+        console.error("Failed to fetch total");
+        return;
+    }
+
+    const totalData = await totalRes.json();
+
+    const container = document.getElementById("review-order");
+
+        container.innerHTML = `
+            <p> copies: ${copies} </p>
+            <p> shop: ${vendor} </p>
+            <p> colored: ${colorValue} </p>
+            <p> size: ${print_size} </p>
+            <p> total: ${totalData} </p>
+            <button id="confirm-order">Continue</button>
+        `;
+
+        
+    document.getElementById("confirm-order").addEventListener("click", () => {
+        createOrder(vendor, copies, print_size, colorValue, totalData);
+    });
+}
+
+async function createOrder(vendor, copies, print_size, colorValue, totalData) {
+    const token = localStorage.getItem("usr_token");
+    
     const file = localStorage.getItem("uploaded_file");
- 
-const color = document.getElementById("color").value; // "color" or "bw"
-const colorValue = color === "color"; //
 
-    const payload = { copies, print_size, color: colorValue, file, total, vendor};
+    const payload = { 
+        copies, 
+        print_size, 
+        color: colorValue, 
+        file, 
+        total: totalData, 
+        vendor
+    };
 
     await fetch("http://localhost:3001/order/createorder", {
         method: "POST",
@@ -104,9 +144,6 @@ const colorValue = color === "color"; //
     });
 
     alert("Order created successfully!");
-
 }
 
 get_vendors();
-
-

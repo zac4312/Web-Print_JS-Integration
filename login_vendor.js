@@ -72,7 +72,7 @@ function renderVendorHome(data) {
         return;
     }
 
-    const vendor = data[0]; // since it's 1 vendor
+    const vendor = data[0];
 
     container.innerHTML = `
         <h3>Vendor Dashboard</h3>
@@ -283,7 +283,7 @@ async function renderHandlingOrders(orders) {
             <p>Size: ${order.print_size}</p>
             <p>Total: ${order.total}</p>
             <p>Status: ${order.status}</p>
-            <img src="${imgUrl}" alt="No receipt available">
+            <img src="${imgUrl}" alt="No receipt available" width=200>
         `;
 
         container.appendChild(div);
@@ -375,7 +375,7 @@ async function downloadFile(file_path, pub_id) {
     const response = await fetch("http://localhost:3001/vendor/download_file", {
         method: "POST",
         headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": "application/json",
             "Authorization": "Bearer " + vendor_token
         },
         body: JSON.stringify({
