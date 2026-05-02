@@ -216,9 +216,6 @@ async function see_reciept(pub_id) {
     return URL.createObjectURL(blob);
 }
    
-
-
-
 let handlingVisible = false;
 
 async function toggleHandlingOrders() {
@@ -238,13 +235,19 @@ async function toggleHandlingOrders() {
 
 async function loadHandlingOrders() {
     const vendor_token = localStorage.getItem("vendor_token");
-
     if (!vendor_token) return;
 
-    const response = await fetch("http://localhost:3001/vendor/handlingorders", {
+    const filter = document.getElementById("order-filter").value;
+
+    let url = "http://localhost:3001/vendor/handling_orders";
+
+    if (filter) {
+        url += `?state=${filter}`;
+    }
+
+    const response = await fetch(url, {
         method: "GET",
         headers: {
-            "Content-Type": "application/json",
             "Authorization": "Bearer " + vendor_token
         }
     });
@@ -257,17 +260,19 @@ async function loadHandlingOrders() {
     }
 
     const orders = JSON.parse(text);
-
     renderHandlingOrders(orders);
 }
 
+function applyFilter() {
+    loadHandlingOrders();
+}
 
 async function renderHandlingOrders(orders) {
-    const container = document.getElementById("handling-container");
+    const container = document.getElementById("orders-list");
     container.innerHTML = "";
 
     if (!orders.length) {
-        container.innerHTML = "<p>No active orders</p>";
+        container.innerHTML = "<p> Empty </p>";
         return;
     }
 
@@ -284,10 +289,46 @@ async function renderHandlingOrders(orders) {
             <p>Total: ${order.total}</p>
             <p>Status: ${order.status}</p>
             <img src="${imgUrl}" alt="No receipt available" width=200>
+
+            <button onclick="set_paid('${order.pub_id}')">
+                Confirm Payment
+            </button>
+
+            <button onclick="set_claimed('${order.pub_id}')">
+                Claimed 
+            </button>
+
+            <button onclick="set_completed('${order.pub_id}')">
+                Order Complete
+            </button>
         `;
 
         container.appendChild(div);
     }
+}
+
+async function set_paid(pub_id) {
+    await fetch("http://localhost:3001/vendor/set_paid", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(pub_id)
+   });
+}
+
+async function set_claimed(pub_id) {
+    await fetch("http://localhost:3001/vendor/set_claimed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(pub_id)
+   });
+}
+
+async function set_completed(pub_id) {
+    await fetch("http://localhost:3001/vendor/set_completed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(pub_id)
+   });
 }
 
 async function updateAvailability() {

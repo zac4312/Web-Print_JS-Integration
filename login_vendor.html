@@ -22,7 +22,19 @@
 
 <button onclick="toggleHandlingOrders()"> Handling Orders</button>
 
-<div id="handling-container" style="display:none;"></div>
+<div id="handling-container" style="display:none;">
+    
+    <select id="order-filter" onchange="applyFilter()">
+        <option value="Accepted">Accepted</option>
+        <option value="Paid">Paid</option>
+        <option value="Claimed">Claimed</option>
+        <option value="Completed">Completed</option>
+        <option value="Rejected">Rejected</option>
+    </select>
+
+    <div id="orders-list"></div>
+
+</div>
 
 <div id="availability-section">
     <h3>Availability</h3>
@@ -53,7 +65,11 @@
         <input type="file" id="gcash-file">
         <button onclick="uploadGcash()">Upload</button>
     </div>
+
+
 </div>
+
+
 
     
 

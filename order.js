@@ -106,6 +106,7 @@ async function review_order() {
     const container = document.getElementById("review-order");
 
         container.innerHTML = `
+            <h3> Order Details </h3>
             <p> copies: ${copies} </p>
             <p> shop: ${vendor} </p>
             <p> colored: ${colorValue} </p>
