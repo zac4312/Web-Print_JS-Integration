@@ -24,9 +24,20 @@
         <button onclick="submitReceipt()">Submit Receipt</button>
     </div>
     
-    <div id="orders-container"></div>
+        <select id="order-filter" onchange="apply_UserFilter()">
+            <option value="Pending">Pending</option>
+            <option value="Accepted">Accepted</option>
+            <option value="Paid">Paid</option>
+            <option value="Claimed">Claimed</option>
+            <option value="Completed">Completed</option>
+            <option value="Rejected">Rejected</option>
+        </select>
+ 
+    <div id="usr_orders-container"> </div>
     
-    <a href="order_process.html"> make order </a>
+    <a href="/order"> make order </a>
+
+    <button type="button" onclick="logout()"> Logout </button>
 
     <script src="client.js"> </script>
 

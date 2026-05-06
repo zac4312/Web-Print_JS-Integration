@@ -2,11 +2,11 @@ const vendor_token = localStorage.getItem("vendor_token");
 
 async function vendorLogin() {
     const payload = {
-        username: document.getElementById("username").value,
+        name: document.getElementById("username").value,
         pw: document.getElementById("password").value
     };
 
-    const response = await fetch("http://localhost:3001/vendor/login", {
+    const response = await fetch("api/vendor/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -40,7 +40,7 @@ async function loadVendorHome() {
         return;
     }
 
-    const response = await fetch("http://localhost:3001/vendor/home", {
+    const response = await fetch("api/vendor/home", {
         method: "get",
         headers: {
             "Content-Type": "application/json",
@@ -103,7 +103,7 @@ async function loadOrders() {
 
     if (!vendor_token) return;
 
-    const response = await fetch("http://localhost:3001/vendor/orders", {
+    const response = await fetch("api/vendor/orders", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -163,7 +163,7 @@ function renderOrders(orders) {
 }
 
 async function acceptOrder(pub_id) {
-    const response = await fetch("http://localhost:3001/vendor/accept", {
+    const response = await fetch("api/vendor/accept", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -179,12 +179,12 @@ async function acceptOrder(pub_id) {
     }
 
     console.log("Accepted:", text);
-
+    
     loadOrders();
 }
 
 async function rejectOrder(pub_id) {
-    const response = await fetch("http://localhost:3001/vendor/reject", {
+    const response = await fetch("api/vendor/reject", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -205,7 +205,7 @@ async function rejectOrder(pub_id) {
 }
 
 async function see_reciept(pub_id) {
-    const response = await fetch(`http://localhost:3001/order/${pub_id}/reciept`);
+    const response = await fetch(`api/order/${pub_id}/reciept`);
 
     if (!response.ok) {
         console.error("Failed to load GCash QR");
@@ -239,7 +239,7 @@ async function loadHandlingOrders() {
 
     const filter = document.getElementById("order-filter").value;
 
-    let url = "http://localhost:3001/vendor/handling_orders";
+    let url = "api/vendor/handling_orders";
 
     if (filter) {
         url += `?state=${filter}`;
@@ -308,27 +308,33 @@ async function renderHandlingOrders(orders) {
 }
 
 async function set_paid(pub_id) {
-    await fetch("http://localhost:3001/vendor/set_paid", {
+    await fetch("api/vendor/set_paid", {
         method: "POST",
         headers: { "Content-Type": "application/json" }, 
         body: JSON.stringify(pub_id)
    });
+    
+    loadHandlingOrders()
 }
 
 async function set_claimed(pub_id) {
-    await fetch("http://localhost:3001/vendor/set_claimed", {
+    await fetch("api/vendor/set_claimed", {
         method: "POST",
         headers: { "Content-Type": "application/json" }, 
         body: JSON.stringify(pub_id)
    });
+    
+    loadHandlingOrders()
 }
 
 async function set_completed(pub_id) {
-    await fetch("http://localhost:3001/vendor/set_completed", {
+    await fetch("api/vendor/set_completed", {
         method: "POST",
         headers: { "Content-Type": "application/json" }, 
         body: JSON.stringify(pub_id)
    });
+    
+    loadHandlingOrders()
 }
 
 async function updateAvailability() {
@@ -348,7 +354,7 @@ async function updateAvailability() {
 
     const value = selected.value;
 
-    const response = await fetch(`http://localhost:3001/vendor/change_status`, {
+    const response = await fetch(`api/vendor/change_status`, {
         method: "POST", // or PATCH (better, but POST is fine for now)
         headers: {
             "Content-Type": "application/json",
@@ -388,7 +394,7 @@ async function uploadGcash() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch("http://localhost:3001/vendor/add_gcash", {
+    const response = await fetch("api/vendor/add_gcash", {
             method: "POST",
             headers: {
                 "Authorization": "Bearer " + vendor_token
@@ -409,15 +415,17 @@ async function uploadGcash() {
     console.log("Uploaded:", path);
 
     alert("GCash QR uploaded!");
+
+    window.location.href = "https://ez-print.shop/vendorlogin"
 }
 
 async function downloadFile(file_path, pub_id) {
 
-    const response = await fetch("http://localhost:3001/vendor/download_file", {
+    const response = await fetch("api/vendor/download_file", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + vendor_token
+            "authorization": "bearer " + vendor_token
         },
         body: JSON.stringify({
             file_path,
@@ -446,3 +454,22 @@ async function downloadFile(file_path, pub_id) {
 
     console.log(file_path)
 }
+
+async function logout_vendor() {
+    const res = await fetch("http://localhost:3001/vendor/logout", {
+        method: "GET",
+        headers: {
+            "Authorization": "Bearer " + vendor_token
+        }
+    });
+
+    if (!res.ok) { 
+        cosole.log("try again"); 
+        return; 
+    }  
+    
+    localStorage.removeItem("vendor_token");
+    window.location.href = "https://ez-print.shop"; 
+    
+}
+

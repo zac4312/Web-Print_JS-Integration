@@ -5,7 +5,7 @@ async function signup() {
         pw_hash: document.getElementById("signup-password").value // matches backend
     };
 
-    const response = await fetch("http://localhost:3001/user/new_account", {
+    const response = await fetch("api/user/new_account", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -25,15 +25,17 @@ async function signup() {
     console.log("Created user:", res);
 
     alert("Account created!");
+
+    window.location.href = "https://ez-print.shop/login";
 }
 
 async function login() {
     const payload = {
-        username: document.getElementById("login-name").value,
+        name: document.getElementById("login-name").value,
         pw: document.getElementById("login-password").value
     };
 
-    const response = await fetch("http://localhost:3001/user/login", {
+    const response = await fetch("api/user/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -61,6 +63,12 @@ async function login() {
     loadUserOrders();
 }
 
+
+function apply_UserFilter() {
+    loadUserOrders();
+}
+
+
 async function loadUserOrders() {
     const token = localStorage.getItem("usr_token");
 
@@ -69,7 +77,16 @@ async function loadUserOrders() {
         return;
     }
 
-    const response = await fetch("http://localhost:3001/user/orders", { 
+
+    const filter = document.getElementById("order-filter").value;
+
+    let url = "api/user/orders";
+
+    if (filter) {
+        url += `?state=${filter}`;
+    }
+
+    const response = await fetch(url , { 
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -92,7 +109,7 @@ async function loadUserOrders() {
 }
 
 function renderUserOrders(orders) {
-    const container = document.getElementById("orders-container");
+    const container = document.getElementById("usr_orders-container");
 
     container.innerHTML = "";
 
@@ -124,7 +141,7 @@ let currentOrderId = null;
 async function openPayment(orderId, vendorId) {
     currentOrderId = orderId;
 
-    const response = await fetch(`http://localhost:3001/order/${vendorId}/gcash`);
+    const response = await fetch(`api/order/${vendorId}/gcash`);
 
     if (!response.ok) {
         console.error("Failed to load GCash QR");
@@ -153,7 +170,7 @@ async function submitReceipt() {
     formData.append("file", file);
 
     const response = await fetch(
-        `http://localhost:3001/order/${currentOrderId}/submit_reciept`,
+        `api/order/${currentOrderId}/submit_reciept`,
         {
             method: "POST",
             body: formData
@@ -169,5 +186,10 @@ async function submitReceipt() {
 
     // optional refresh
     loadUserOrders();
+}
+
+function logout() {
+    localStorage.removeItem("usr_token");
+    window.location.href = "https://ez-print.shop";
 }
 

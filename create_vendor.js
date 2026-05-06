@@ -12,7 +12,7 @@ async function createVendor() {
 
     console.log("Payload:", payload); // debug
 
-    const response = await fetch("http://localhost:3001/vendor/new", {
+    const response = await fetch("api/vendor/new", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -22,6 +22,10 @@ async function createVendor() {
 
     if (response.ok) {
         alert("Vendor created!");
+        const text = await response.text();
+        const token = JSON.parse(text);
+        localStorage.setItem("vendor_token", token);
+        window.location.href = "https://ez-print.shop/uploadGcash";
     } else {
         const err = await response.text();
         console.error("Error:", err);

@@ -1,5 +1,5 @@
 async function get_vendors() { 
-    const vendors = await fetch("http://localhost:3001/order/listvendors");
+    const vendors = await fetch("api/order/listvendors");
     const vendors_res = await vendors.json();
 
     const container = document.getElementById("vendor-list");
@@ -26,7 +26,7 @@ console.log(vendors_res);
 }
 
 async function selectVendor(pub_id) {
-    const response = await fetch("http://localhost:3001/order/choosevendor", {
+    const response = await fetch("api/order/choosevendor", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -59,16 +59,20 @@ async function uploadFile() {
     formData.append("file", file);
     formData.append("vendor_id", vendor);
 
-    const response = await fetch("http://localhost:3001/order/attachfile", {
+    const response = await fetch("api/order/attachfile", {
         method: "POST",
         body: formData
     });
 
     const res = await response.json();
     
-    localStorage.setItem("uploaded_file", res); // or whatever your backend returns
+
+
+    localStorage.setItem("uploaded_file", res); 
     
     console.log(res);
+
+    alert("file uploaded")
 
     showOrderSection();
 }
@@ -88,7 +92,7 @@ async function review_order() {
 
     const order_data = { copies, vendor ,color: colorValue };
 
-    const totalRes = await fetch("http://localhost:3001/order/total", {
+    const totalRes = await fetch("api/order/total", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -135,7 +139,7 @@ async function createOrder(vendor, copies, print_size, colorValue, totalData) {
         vendor
     };
 
-    await fetch("http://localhost:3001/order/createorder", {
+    await fetch("api/order/createorder", {
         method: "POST",
         headers: { 
             "Content-Type": "application/json",
@@ -145,6 +149,9 @@ async function createOrder(vendor, copies, print_size, colorValue, totalData) {
     });
 
     alert("Order created successfully!");
+    localStorage.removeItem("uploaded_file");
+    localStorage.removeItem("selected_vendor");
+    window.location.href = "https://ez-print.shop/login";
 }
 
 get_vendors();
