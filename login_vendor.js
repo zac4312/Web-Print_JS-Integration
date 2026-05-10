@@ -1,5 +1,17 @@
 const vendor_token = localStorage.getItem("vendor_token");
 
+function formatTimestamp(timestamp) {
+    if (!timestamp) {
+        return "Pending";
+    }
+
+    return new Date(timestamp).toLocaleString("en-PH", {
+        timeZone: "Asia/Manila",
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
+}
+
 async function vendorLogin() {
     const payload = {
         name: document.getElementById("username").value,
@@ -76,6 +88,7 @@ function renderVendorHome(data) {
 
     container.innerHTML = `
         <h3>Vendor Dashboard</h3>
+        <p>Vacancy: ${vendor.vacancy}</p>
         <p>Latitude: ${vendor.lat}</p>
         <p>Longitude: ${vendor.long}</p>
     `;
@@ -267,6 +280,26 @@ function applyFilter() {
     loadHandlingOrders();
 }
 
+function handleOrderAction(action, pub_id) {
+    if (!action) return;
+
+    switch (action) {
+        case "paid":
+            set_paid(pub_id);
+            break;
+        case "claimed":
+            set_claimed(pub_id);
+            break;
+        case "printed":
+            set_printed(pub_id);
+            break;
+        case "completed":
+            set_completed(pub_id);
+            break;
+    }
+}
+
+
 async function renderHandlingOrders(orders) {
     const container = document.getElementById("orders-list");
     container.innerHTML = "";
@@ -289,22 +322,32 @@ async function renderHandlingOrders(orders) {
             <p>Total: ${order.total}</p>
             <p>Status: ${order.status}</p>
             <img src="${imgUrl}" alt="No receipt available" width=200>
-
-            <button onclick="set_paid('${order.pub_id}')">
-                Confirm Payment
-            </button>
-
-            <button onclick="set_claimed('${order.pub_id}')">
-                Claimed 
-            </button>
-
-            <button onclick="set_completed('${order.pub_id}')">
-                Order Complete
-            </button>
+            <p>created on: ${formatTimestamp(order.created_at)}</p>
+            <p>paid on: ${formatTimestamp(order.paid_at)}</p>
+            <p>claimed on: ${formatTimestamp(order.claimed_at)}</p>
+            <p>completed on: ${formatTimestamp(order.completed_at)}</p>
+            
+            <select onchange="handleOrderAction(this.value, '${order.pub_id}')">
+                <option value="">${order.status}</option>
+                <option value="paid">Confirm Payment</option>
+                <option value="claimed">Claimed</option>
+                <option value="printed">Printed</option>
+                <option value="completed">Order Complete</option>
+            </select>        
         `;
 
         container.appendChild(div);
     }
+}
+
+async function set_printed(pub_id) {
+    await fetch("api/vendor/set_printed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify(pub_id) 
+    })
+
+    loadHandlingOrders()
 }
 
 async function set_paid(pub_id) {

@@ -1,3 +1,15 @@
+function formatTimestamp(timestamp) {
+    if (!timestamp) {
+        return "Pending";
+    }
+
+    return new Date(timestamp).toLocaleString("en-PH", {
+        timeZone: "Asia/Manila",
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
+}
+
 async function signup() {
     const payload = {
         name: document.getElementById("signup-name").value,
@@ -59,7 +71,6 @@ async function login() {
 
     alert("Welcome Back");
 
-    // ✅ load orders immediately
     loadUserOrders();
 }
 
@@ -126,6 +137,12 @@ function renderUserOrders(orders) {
             <p>Vendor: ${order.brand}</p>
             <p>Status: ${order.status}</p>
             <p>Total: ${order.total}</p>
+            <p>created on: ${formatTimestamp(order.created_at)}</p>
+            <p>paid on: ${formatTimestamp(order.paid_at)}</p>
+            <p>claimed on: ${formatTimestamp(order.claimed_at)}</p>
+            <p>completed on: ${formatTimestamp(order.completed_at)}</p>
+
+
 
             <button onclick="openPayment('${order.o_pub_id}', '${order.v_pub_id}')">
                 Pay
