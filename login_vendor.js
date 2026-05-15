@@ -327,6 +327,7 @@ async function renderHandlingOrders(orders) {
             <p>claimed on: ${formatTimestamp(order.claimed_at)}</p>
             <p>completed on: ${formatTimestamp(order.completed_at)}</p>
             
+            <p> Change Order Status: </p>
             <select onchange="handleOrderAction(this.value, '${order.pub_id}')">
                 <option value="">${order.status}</option>
                 <option value="paid">Confirm Payment</option>
